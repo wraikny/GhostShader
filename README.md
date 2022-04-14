@@ -15,4 +15,5 @@ Main Textureが空だと描画がおかしくなる場合があったので、wh
 * IsFading: 距離に応じて透過を行う
 * Min Distance: 透過の最小距離（これより近いと、はっきり見える）
 * Max Distance: 透過の最大距離（これより遠いと、まったく見えない）
+* Distance Mode: 環境への距離とオブジェクトへの距離のどちらを利用するか
 * Force Mirror View: 鏡の中での見え方を確認する（デバッグ用）

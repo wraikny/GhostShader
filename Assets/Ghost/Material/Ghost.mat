@@ -57,16 +57,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
+    - _Cull: 2
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _Distance: 1
+    - _DistanceMode: 3
     - _DstBlend: 0
     - _ForceMirrorView: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _IsFading: 1
-    - _MaxDistance: 5
+    - _MaxDistance: 3
     - _Metallic: 0
     - _MinDistance: 0
     - _MirrorAlpha: 0.8

@@ -16,6 +16,9 @@
         // 透過の最大距離（これより遠いと、まったく見えない）
         _MaxDistance("Max Distance", Float) = 5
 
+        [Enum(Depth, 0, Object, 1, Minimum, 2, Maximum, 3)]
+        _DistanceMode("Distance Mode", Int) = 0
+
         // 鏡の中での見え方を確認する（デバッグ用）
         [MaterialToggle]_ForceMirrorView("Force Mirror View", Int) = 0
 
@@ -50,6 +53,8 @@
 
             float _MinDistance;
             float _MaxDistance;
+
+            int _DistanceMode;
 
             bool _IsFading;
             bool _ForceMirrorView;
@@ -118,12 +123,27 @@
                 float eyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.grabPos).x);
 
                 // _CameraDepthTextureのワールド座標での距離
-                float dDistance = length(depthToWorldPos(i.worldPos, eyeDepth) - _WorldSpaceCameraPos);
+                float depthDistance = length(depthToWorldPos(i.worldPos, eyeDepth) - _WorldSpaceCameraPos);
+                float objectDistance = length(i.worldPos - _WorldSpaceCameraPos);
+                float distance = depthDistance;
+                switch (_DistanceMode) {
+                    case 1:
+                        distance = objectDistance;
+                        break;
+                    case 2:
+                        distance = min(depthDistance, objectDistance);
+                        break;
+                    case 3:
+                        distance = max(depthDistance, objectDistance);
+                        break;
+                    default:
+                        break;
+                }
 
                 float4 color = tex2D(_MainTex, i.uv) * _Color;
 
                 // 見えない
-                if (dDistance >= _MaxDistance) discard;
+                if (distance >= _MaxDistance) discard;
 
                 // 鏡での見え方
                 if (_ForceMirrorView || IsInMirror()) {
@@ -138,9 +158,9 @@
                 o.depth = 1;
 
                 // Fade
-                if (_IsFading && (_MinDistance < dDistance) && (dDistance < _MaxDistance))
+                if (_IsFading && (_MinDistance < distance) && (distance < _MaxDistance))
                 {
-                    float alpha = 1 - (dDistance - _MinDistance) / (_MaxDistance - _MinDistance);
+                    float alpha = 1 - (distance - _MinDistance) / (_MaxDistance - _MinDistance);
                     o.col.rgb = float4(blendGrabTexture(color.rgb, i.grabPos, alpha * _Color.a), 1);
                 } else {
                     o.col = float4(color.rgb, 1);
