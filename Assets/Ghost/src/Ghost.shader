@@ -120,6 +120,16 @@
 
             fragOut frag(v2f i)
             {
+                float4 color = tex2D(_MainTex, i.uv) * _Color;
+
+                // 鏡での見え方
+                if (_ForceMirrorView || IsInMirror()) {
+                    fragOut o;
+                    o.depth = worldPosToDepth(i.worldPos);
+                    o.col = float4(blendGrabTexture(color.rgb, i.grabPos, _Color.a * _MirrorAlpha), 1);
+                    return o;
+                }
+
                 float eyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.grabPos).x);
 
                 // _CameraDepthTextureのワールド座標での距離
@@ -140,18 +150,8 @@
                         break;
                 }
 
-                float4 color = tex2D(_MainTex, i.uv) * _Color;
-
                 // 見えない
                 if (distance >= _MaxDistance) discard;
-
-                // 鏡での見え方
-                if (_ForceMirrorView || IsInMirror()) {
-                    fragOut o;
-                    o.depth = worldPosToDepth(i.worldPos);
-                    o.col = float4(blendGrabTexture(color.rgb, i.grabPos, _Color.a * _MirrorAlpha), 1);
-                    return o;
-                }
 
                 fragOut o;
                 // 常に見えるように
