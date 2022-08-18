@@ -58,8 +58,6 @@
             #include "UnityCG.cginc"
             #include "Ghost.cginc"
 
-            #include "Ghost.cginc"
-
             fragOut frag(v2f i)
             {
                 if (_ForceMirrorView || IsInMirror()) {
@@ -112,8 +110,6 @@
             #include "UnityCG.cginc"
             #include "Ghost.cginc"
 
-            #include "Ghost.cginc"
-
             fragOut frag(v2f i)
             {
                 if (_ForceMirrorView || IsInMirror()) {
@@ -158,8 +154,6 @@
             #pragma fragment frag
             
             #include "UnityCG.cginc"
-            #include "Ghost.cginc"
-
             #include "Ghost.cginc"
 
             v2f vert (appdata v)
