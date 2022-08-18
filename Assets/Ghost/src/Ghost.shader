@@ -5,8 +5,6 @@
         _MainTex("Main Texture", 2D) = "White" {}
         _Color("Color", Color) = (1,1,1,1)
 
-        _Alpha("Alpha", Range(0, 1)) = 0.8
-
         // 距離に応じて透過を行う
         [MaterialToggle]_IsFading("Is Fading", Int) = 1
 
@@ -35,7 +33,7 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" "VRCFallback"="Toon" }
         Cull [_Cull]
 
         GrabPass { }
@@ -141,8 +139,6 @@
                     o.col = color.rgba;
                 }
 
-                o.col.a *= _Alpha;
-
                 o.col.rgb = blendGrabTexture(o.col, i.screenPos, o.col.a);
 
                 return o;
@@ -196,8 +192,7 @@
 
                 fragOut o;
 
-                o.col.rgb = color.rgb;
-                o.col.a = _Alpha * color.a;
+                o.col = color;
 
                 o.col.rgb = blendGrabTexture(o.col, i.screenPos, o.col.a);
 

@@ -4,7 +4,6 @@
 #include "Utils.cginc"
 
 float4 _Color;
-float _Alpha;
 
 sampler2D _GrabTexture;
 sampler2D _CameraDepthTexture;
