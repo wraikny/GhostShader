@@ -28,6 +28,8 @@
         // 距離に応じて透過を行う
         [MaterialToggle]_IsFadingShadow("Is Fading Shadow", Int) = 1
 
+        [MaterialToggle]_WriteCameraDepthInMirror("Write Camera Depth in Mirror", Int) = 0
+
         [Enum(UnityEngine.Rendering.CullMode)]
         _Cull("Cull Mode", Float) = 2 // Back
 
@@ -201,6 +203,8 @@
 
             #include "UnityCG.cginc"
 
+            #include "Utils.cginc"
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -222,8 +226,16 @@
             }
 
             sampler2D _CameraDepthTexture;
+            bool _ForceMirrorView;
+            bool _WriteCameraDepthInMirror;
 
             float frag(v2f i) : SV_Depth {
+                if (_ForceMirrorView || IsInMirror()) {
+                    if (!_WriteCameraDepthInMirror) {
+                        discard;
+                    }
+                }
+
                 return tex2Dproj(_CameraDepthTexture, i.screenPos).x;
             }
 
