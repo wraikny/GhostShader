@@ -63,6 +63,7 @@ Material:
     - _Distance: 1
     - _DistanceMode: 3
     - _DstBlend: 0
+    - _Easing: 4
     - _ForceMirrorView: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5

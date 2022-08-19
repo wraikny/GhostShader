@@ -24,13 +24,14 @@ float4 _MainTex_ST;
 
 bool _ForceMirrorView;
 
+float _Easing;
+
 // 色をGrabTextureと合成する
-float3 blendGrabTexture(float3 col, float4 screenPos, float alpha)
+float3 blendGrabTexture(float4 col, float4 screenPos)
 {
     float3 background = tex2Dproj(_GrabTexture, screenPos).rgb;
-    return alpha * col + (1.0 - alpha) * background;
+    return col.a * col + (1.0 - col.a) * background;
 }
-
 
 float getWorldDistance(float3 worldPos, float4 screenPos) {
     float eyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, screenPos).x);
@@ -54,6 +55,45 @@ float getWorldDistance(float3 worldPos, float4 screenPos) {
     }
 
     return distance;
+}
+
+#define EASING_Linear 0
+#define EASING_InSine 1
+#define EASING_OutSine 2
+#define EASING_InQuad 3
+#define EASING_OutQuad 4
+#define EASING_InQubic 5
+#define EASING_OutQubic 6
+
+float getEasing(int easing, float t) {
+    const float pi = 3.1415926535;
+
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+
+    switch(easing) {
+        case EASING_Linear: return t;
+        case EASING_InSine: return 1 - cos(t * pi * 0.5);
+        case EASING_OutSine: return sin(t * pi * 0.5);
+        case EASING_InQuad: return t * t;
+        case EASING_OutQuad: return t * (2 - t);
+        case EASING_InQubic: return t * t * t;
+        case EASING_OutQubic: return (t - 1) * (t - 1) * (t - 1) + 1;
+        default: return t;
+    }
+}
+
+float4 fadeColor(float4 color, float distance, int easing) {
+    if ((_MinDistance < distance) && (distance < _MaxDistance))
+    {
+        float alpha = 1 - (distance - _MinDistance) / (_MaxDistance - _MinDistance);
+        
+        alpha = getEasing(easing, alpha);
+
+        return float4(color.rgb, alpha * color.a);
+    }
+
+    return color;
 }
 
 struct appdata

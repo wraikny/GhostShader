@@ -17,6 +17,9 @@
         [Enum(Depth, 0, Object, 1, Minimum, 2, Maximum, 3)]
         _DistanceMode("Distance Mode", Int) = 0
 
+        [Enum(Linear, 0, InSine, 1, OutSine, 2, InQuad, 3, OutQuad, 4, InCubic, 5, OutCubic, 6)]
+        _Easing("Easing", Int) = 0
+
         [Enum(Tex, 0, ShadowColor, 1)]
         _ShadowColorMode("Shadow Color Mode", Int) = 0
 
@@ -78,18 +81,13 @@
                 if (distance >= _MaxDistance) discard;
 
                 fragOut o;
+                o.col = color;
 
-                // Fade
-                if (_IsFadingShadow && (_MinDistance < distance) && (distance < _MaxDistance))
-                {
-                    float alpha = 1 - (distance - _MinDistance) / (_MaxDistance - _MinDistance);
-                    o.col.rgb = color.rgb;
-                    o.col.a = alpha * color.a;
-                } else {
-                    o.col = color.rgba;
+                if (_IsFadingShadow) {
+                    o.col = fadeColor(o.col, distance, _Easing);
                 }
 
-                o.col.rgb = blendGrabTexture(o.col, i.screenPos, o.col.a);
+                o.col.rgb = blendGrabTexture(o.col, i.screenPos);
 
                 return o;
             }
@@ -125,17 +123,13 @@
 
                 fragOut o;
 
-                // Fade
-                if (_IsFading && (_MinDistance < distance) && (distance < _MaxDistance))
-                {
-                    float alpha = 1 - (distance - _MinDistance) / (_MaxDistance - _MinDistance);
-                    o.col.rgb = color.rgb;
-                    o.col.a = alpha * color.a;
-                } else {
-                    o.col = color.rgba;
+                o.col = color;
+
+                if (_IsFading) {
+                    o.col = fadeColor(o.col, distance, _Easing);
                 }
 
-                o.col.rgb = blendGrabTexture(o.col, i.screenPos, o.col.a);
+                o.col.rgb = blendGrabTexture(o.col, i.screenPos);
 
                 return o;
             }
@@ -188,7 +182,7 @@
 
                 o.col = color;
 
-                o.col.rgb = blendGrabTexture(o.col, i.screenPos, o.col.a);
+                o.col.rgb = blendGrabTexture(o.col, i.screenPos);
 
                 return o;
             }
@@ -216,7 +210,6 @@
             {
                 float4 vertex : SV_POSITION;
                 float4 screenPos : TEXCOORD0;
-                float3 worldPos : TEXCOORD1;
             };
 
             v2f vert (appdata v)
@@ -224,20 +217,14 @@
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.screenPos = ComputeScreenPos(o.vertex);
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 
                 return o;
             }
 
             sampler2D _CameraDepthTexture;
 
-            #include "Utils.cginc"
-
             float frag(v2f i) : SV_Depth {
-                float eyeDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.screenPos).x);
-                float3 depthWPos = depthToWorldPos(i.worldPos, eyeDepth);
-                float depth = worldPosToDepth(depthWPos);
-                return depth;
+                return tex2Dproj(_CameraDepthTexture, i.screenPos).x;
             }
 
             ENDCG
