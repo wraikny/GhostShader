@@ -9,6 +9,9 @@
 
         [Enum(N16, 0, N32, 1, N64, 2)]
         _Resolution("Resolution", Int) = 0
+
+        [MaterialToggle]
+        _VisibleInMirror("Visible in Mirror", Int) = 1
     }
     SubShader
     {
@@ -43,6 +46,8 @@
 
             float _Distance;
             int _Resolution;
+
+            bool _VisibleInMirror;
 
             sampler2D _CameraDepthTexture;
 
@@ -131,7 +136,9 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-                if (!IsInMirror()) {
+                if (IsInMirror()) {
+                    if (!_VisibleInMirror) discard;
+                } else {
                     float2 screenPos = i.screenPos.xy / i.screenPos.w;
 
                     float thresholdDistance = _Distance;
