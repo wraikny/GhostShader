@@ -1,4 +1,6 @@
-# Ghost Shader
+# GhostShader
+
+## Ghost Shader
 
 `_CameraDepthTexture`から取得した距離に応じて透過するシェーダー。
 
@@ -7,7 +9,7 @@ CullingMaskにreservedを指定済みかつIntensityを低くしたものをPref
 
 Main Textureが空だと描画がおかしくなる場合があったので、whiteテクスチャも入れておいた。
 
-## Properties
+### Properties
 
 * Main Texture: テクスチャ
 * Color: 色
@@ -17,3 +19,17 @@ Main Textureが空だと描画がおかしくなる場合があったので、wh
 * Max Distance: 透過の最大距離（これより遠いと、まったく見えない）
 * Distance Mode: 環境への距離とオブジェクトへの距離のどちらを利用するか
 * Force Mirror View: 鏡の中での見え方を確認する（デバッグ用）
+
+## YubiCamera Shader
+
+指で囲った四角形の内側でのみ見えるシェーダー。  
+正確には上下左右方向に一定距離以内の深度値がサンプリングされると描画されるシェーダー。
+
+### Properties
+
+* Main Texture: テクスチャ
+* Color: 色
+* Distance: 囲いを判定する最大距離
+* Sampling Resolution: サンプリング数
+* Sampling Range: サンプリング範囲
+* VisibleInMirror: ミラーの中で見えるか

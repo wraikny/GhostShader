@@ -60,7 +60,7 @@ Material:
     - _CDTResolution: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _Distance: 0.5
+    - _Distance: 0.75
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
@@ -70,6 +70,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _Resolution: 1
+    - _SamplingRange: 0.8
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
