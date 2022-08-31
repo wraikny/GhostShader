@@ -1,11 +1,11 @@
 # GhostShader
 
+VRChatではDirectional Lightをアバターに入れないと上手く動かないことがあるので、
+CullingMaskにreservedを指定済みかつIntensityを低くしたものをPrefabにした。
+
 ## Ghost Shader
 
 `_CameraDepthTexture`から取得した距離に応じて透過するシェーダー。
-
-VRChatではDirectional Lightをアバターに入れないと上手く動かないことがあるので、
-CullingMaskにreservedを指定済みかつIntensityを低くしたものをPrefabにした。
 
 Main Textureが空だと描画がおかしくなる場合があったので、whiteテクスチャも入れておいた。
 
