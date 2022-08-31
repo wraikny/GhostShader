@@ -1,11 +1,11 @@
 # GhostShader
 
-VRChatではDirectional Lightをアバターに入れないと上手く動かないことがあるので、
-CullingMaskにreservedを指定済みかつIntensityを低くしたものをPrefabにした。
-
 ## Ghost Shader
 
 `_CameraDepthTexture`から取得した距離に応じて透過するシェーダー。
+
+VRChatではDirectional Lightをアバターに入れないと上手く動かないことがあるので、
+CullingMaskにreservedを指定済みかつIntensityを低くしたものをPrefabにした。
 
 Main Textureが空だと描画がおかしくなる場合があったので、whiteテクスチャも入れておいた。
 
@@ -25,11 +25,14 @@ Main Textureが空だと描画がおかしくなる場合があったので、wh
 指で囲った四角形の内側でのみ見えるシェーダー。  
 正確には上下左右方向に一定距離以内の深度値がサンプリングされると描画されるシェーダー。
 
+VRChatではDirectional Lightをアバターに入れないと上手く動かないことがあるので、
+CullingMaskにreservedを指定済みかつIntensityを低くしたものをPrefabにした。
+
 ### Properties
 
 * Main Texture: テクスチャ
 * Color: 色
 * Distance: 囲いを判定する最大距離
 * Sampling Resolution: サンプリング数
-* Sampling Range: サンプリング範囲
+* Sampling Range: サンプリング範囲（N64でいいかも）
 * VisibleInMirror: ミラーの中で見えるか
