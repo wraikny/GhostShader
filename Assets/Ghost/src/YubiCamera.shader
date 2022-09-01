@@ -8,10 +8,13 @@
         _Distance("Distance", Float) = 0.5
 
         [Enum(N16, 0, N32, 1, N64, 2)]
-        _Resolution("Sampling Resolution", Int) = 0
+        _Resolution("Sampling Resolution", Int) = 2
         
         [Range(0,1)]
-        _SamplingRange("Sampling Range", Float) = 0.9
+        _SamplingRange("Sampling Range", Float) = 0.8
+
+        [MaterialToggle]
+        _VisibleInFrame("Visible in Frame", Int) = 1
 
         [MaterialToggle]
         _VisibleInMirror("Visible in Mirror", Int) = 1
@@ -49,6 +52,7 @@
             float _Distance;
             int _Resolution;
             float _SamplingRange;
+            bool _VisibleInFrame;
             bool _VisibleInMirror;
 
             sampler2D _CameraDepthTexture;
@@ -82,20 +86,26 @@
                     if (getDepth(float2(t, screenPos.y)) < _Distance) { \
                         if (t < screenPos.x) { \
                             left = true; \
+                        } else if (!left) { \
+                            break; \
                         } else { \
+                            if (!left) break; \
                             right = true; \
                         } \
                     } \
                     if (getDepth(float2(screenPos.x, t)) < _Distance) { \
                         if (t < screenPos.y) { \
                             down = true; \
+                        } else if (!down) { \
+                            break; \
                         } else { \
                             up = true; \
                         } \
                     } \
                     if (right && left && up && down) break; \
                 } \
-                if (!right || !left || !up || !down) discard; \
+                bool inFrame = (right && left && up && down); \
+                if (inFrame != _VisibleInFrame) discard; \
             } while (0)
 
             fixed4 frag (v2f i) : SV_Target
