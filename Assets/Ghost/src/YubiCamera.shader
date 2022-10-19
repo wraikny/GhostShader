@@ -19,7 +19,7 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue" = "Geometry+300" "VRCFallback"="Toon" }
+        Tags { "RenderType"="Opaque" "Queue" = "Geometry+300" "VRCFallback"="Hidden" }
 
         Pass
         {
@@ -101,28 +101,30 @@
                 bool right = false; \
                 bool up = false; \
                 bool down = false; \
-                [unroll] \
-                for(int _i = 0; _i < N; _i++) { \
-                    float t = ((float)_i + 0.5) / N * _SamplingRange + (1 - _SamplingRange) / 2; \
-                    if (checkDepth(float2(t, screenPos.y), surfaceDistance)) { \
-                        if (t < screenPos.x) { \
-                            left = true; \
-                        } else if (!left) { \
-                            break; \
-                        } else { \
-                            right = true; \
+                if (getDepth(screenPos) > surfaceDistance) { \
+                    [unroll] \
+                    for(int _i = 0; _i < N; _i++) { \
+                        float t = ((_i + 0.5) / N) * _SamplingRange + (1 - _SamplingRange) / 2; \
+                        if (checkDepth(float2(t, screenPos.y), surfaceDistance)) { \
+                            if (t < screenPos.x) { \
+                                left = true; \
+                            } else if (!left) { \
+                                break; \
+                            } else { \
+                                right = true; \
+                            } \
                         } \
-                    } \
-                    if (checkDepth(float2(screenPos.x, t), surfaceDistance)) { \
-                        if (t < screenPos.y) { \
-                            down = true; \
-                        } else if (!down) { \
-                            break; \
-                        } else { \
-                            up = true; \
+                        if (checkDepth(float2(screenPos.x, t), surfaceDistance)) { \
+                            if (t < screenPos.y) { \
+                                down = true; \
+                            } else if (!down) { \
+                                break; \
+                            } else { \
+                                up = true; \
+                            } \
                         } \
+                        if (right && left && up && down) break; \
                     } \
-                    if (right && left && up && down) break; \
                 } \
                 bool inFrame = (right && left && up && down); \
                 if (inFrame != (_VisibleMode == 1)) discard; \
