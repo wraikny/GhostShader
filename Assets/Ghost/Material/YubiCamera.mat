@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: YubiCamera
   m_Shader: {fileID: 4800000, guid: 1ca48846761980a4e9d579bc1f8f6189, type: 3}
-  m_ShaderKeywords: _VISIBLEINFRAME_ON _VISIBLEINMIRROR_ON
+  m_ShaderKeywords: _VISIBLEINFRAME_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -76,7 +76,8 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _VisibleInFrame: 1
-    - _VisibleInMirror: 1
+    - _VisibleInFrontSide: 0
+    - _VisibleInMirror: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
