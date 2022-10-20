@@ -33,6 +33,6 @@ CullingMaskにreservedを指定済みかつIntensityを低くしたものをPref
 * Main Texture: テクスチャ
 * Color: 色
 * Distance: 囲いを判定する最大距離
-* Sampling Resolution: サンプリング数
-* Sampling Range: サンプリング範囲（N64でいいかも）
+* Sampling Range: サンプリング範囲
+* Visible Mode: 枠の中でのみ見える(InFrame)か、枠の外でのみ見える(OutFrame)か
 * VisibleInMirror: ミラーの中で見えるか
