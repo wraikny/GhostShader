@@ -78,6 +78,7 @@ Material:
     - _VisibleInFrame: 1
     - _VisibleInFrontSide: 0
     - _VisibleInMirror: 0
+    - _VisibleMode: 1
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
