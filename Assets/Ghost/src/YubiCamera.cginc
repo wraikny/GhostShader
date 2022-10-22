@@ -66,7 +66,7 @@ bool isForceVisibleMaskEnabled(float2 uv) {
 
 void yubiCameraImpl(float2 uv, float4 inScreenPos, float3 inWorldPos) {
     if (insideMirror()) {
-        if (!_VisibleInMirror) discard;
+        if (!_VisibleInMirror && !isForceVisibleMaskEnabled(uv)) discard;
     } else {
         if (!isForceVisibleMaskEnabled(uv)) {
             bool left = false, right = false, up = false, down = false;
