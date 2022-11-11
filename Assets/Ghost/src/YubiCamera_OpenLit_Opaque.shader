@@ -57,7 +57,7 @@ Shader "wraiknys/YubiCameraOpenLit/Opaque"
         [Space]
         [Enum(UnityEngine.Rendering.CullMode)]
         _Cull("Cull Mode", Float) = 2 // Back
-}
+    }
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue" = "Geometry+300" "VRCFallback"="Hidden" }

@@ -16,52 +16,32 @@ bool insideMirror() {
 }
 
 // Depth (World座標)
-float getDepth(float2 uv) {
+float getDepth(in float2 uv) {
     float eyeDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv));
     return eyeDepth;
 }
 
-float surfaceWorldDepth(float3 wPos) {
+float surfaceWorldDepth(in float3 wPos) {
     float3 cameraViewDir = -UNITY_MATRIX_V._m20_m21_m22;
     return dot((wPos - _WorldSpaceCameraPos), cameraViewDir);
 }
 
-bool checkDepth(float2 uv, float surfaceDistance) {
+bool checkDepth(float2 uv, in float surfaceDistance) {
     float depth = getDepth(uv);
     return (depth < surfaceDistance) && (depth < _Distance);
 }
 
-bool isForceVisibleMaskEnabled(float2 uv) {
-    return tex2D(_YubiForceVisibleMask, uv).a != 0;
+float2 adjustStereo(float2 uv) {
+#if UNITY_SINGLE_PASS_STEREO
+    // float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
+    // uv = (uv - scaleOffset.zw) / scaleOffset.xy;
+    // return float2(uv.x * 0.5 + unity_StereoEyeIndex * 0.5, uv.y);
+#endif
+    return uv;
 }
 
-#define YUBICAMERA_CHECK_DEPTH(TARGET, U, V) \
-    if (!TARGET && checkDepth(float2(U, V), __surfaceDistance)) { \
-        TARGET = true; \
-    }
-
-#define YUBICAMERA_ITERATION(N, SP, SD) { \
-    float2 __screenPos = (SP); \
-    float __surfaceDistance = (SD); \
-    float samplingRange = clamp(_SamplingRange, 0.0, 1.0); \
-    [unroll] for (int _i = 0; _i < N; _i++) { \
-        float t = ((_i + 0.5) / N) * samplingRange + (1.0 - samplingRange) * 0.5; \
-        if (t < __screenPos.x) { \
-            YUBICAMERA_CHECK_DEPTH(left, t, __screenPos.y) \
-        } else if (!left) { \
-            break; \
-        } else { \
-            YUBICAMERA_CHECK_DEPTH(right, t, __screenPos.y) \
-        } \
-        if (t < __screenPos.y) { \
-            YUBICAMERA_CHECK_DEPTH(down, __screenPos.x, t) \
-        } else if (!down) { \
-            break; \
-        } else { \
-            YUBICAMERA_CHECK_DEPTH(up, __screenPos.x, t) \
-        } \
-        if (left && right && down && up) break; \
-    } \
+bool isForceVisibleMaskEnabled(in float2 uv) {
+    return tex2D(_YubiForceVisibleMask, uv).a != 0;
 }
 
 void yubiCameraImpl(float2 uv, float4 inScreenPos, float3 inWorldPos) {
@@ -74,13 +54,31 @@ void yubiCameraImpl(float2 uv, float4 inScreenPos, float3 inWorldPos) {
             float surfaceDistance = surfaceWorldDepth(inWorldPos);
 
             if (getDepth(screenPos) > surfaceDistance) {
-                YUBICAMERA_ITERATION(64, screenPos, surfaceDistance)
+                const int iterCount = 128;
+                const float m = 8;
+
+                const float samplingRange = clamp(_SamplingRange, 0.0, 1.0);
+
+                for (int _i = 0; _i < iterCount; _i++) {
+                    float t = ((float)_i / iterCount);
+                    t = fmod(m * t + floor(m * t) / iterCount, 1.0);
+                    t = t * samplingRange + (1.0 - samplingRange) * 0.5;
+
+                    const bool depthPassX = checkDepth(adjustStereo(float2(t, screenPos.y)), surfaceDistance);
+                    const bool depthPassY = checkDepth(float2(screenPos.x, t), surfaceDistance);
+
+                    left = left || ((t < screenPos.x) && depthPassX);
+                    right = right || ((screenPos.x <= t) && depthPassX);
+                    down = down || ((t < screenPos.y) && depthPassY);
+                    up = up || ((screenPos.y <= t) && depthPassY);
+
+                    if (left && right && down && up) break;
+                }
             }
 
             bool inFrame = (right && left && up && down);
             if (inFrame != (_VisibleMode == 1)) discard;
         }
-
     }
 }
 

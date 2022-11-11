@@ -25,6 +25,7 @@ struct appdata
     float2 uv       : TEXCOORD0;
     float2 uv1      : TEXCOORD1;
     float3 normalOS : NORMAL;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct v2f
@@ -52,11 +53,15 @@ struct v2f
         #endif
     #endif
     float4 screenPos : TEXCOORD10;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 v2f vert(appdata v)
 {
     v2f o;
+    UNITY_SETUP_INSTANCE_ID(v);
+    UNITY_INITIALIZE_OUTPUT(v2f, o);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
     o.positionWS    = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0));
     o.pos           = UnityWorldToClipPos(o.positionWS);
@@ -89,6 +94,8 @@ v2f vert(appdata v)
 
 float4 frag(v2f i) : SV_Target
 {
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
     if (_EnabledYubiCamera) {
         yubiCameraImpl(i.uv, i.screenPos, i.positionWS);
     }
