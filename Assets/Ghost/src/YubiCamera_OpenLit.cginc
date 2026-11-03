@@ -12,7 +12,7 @@
 // [OpenLit] Include this
 #include "OpenLit.cginc"
 
-sampler2D _CameraDepthTexture;
+UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
 
 #include "YubiCamera.cginc"
@@ -67,7 +67,7 @@ v2f vert(appdata v)
     o.pos           = UnityWorldToClipPos(o.positionWS);
     o.uv            = TRANSFORM_TEX(v.uv, _MainTex);
     o.normalWS      = UnityObjectToWorldNormal(v.normalOS);
-    o.screenPos     = ComputeScreenPos(o.pos);
+    o.screenPos     = ComputeNonStereoScreenPos(o.pos);
     UNITY_TRANSFER_FOG(o,o.pos);
     UNITY_TRANSFER_LIGHTING(o,v.uv1);
 

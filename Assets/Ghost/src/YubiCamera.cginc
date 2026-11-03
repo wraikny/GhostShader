@@ -15,9 +15,10 @@ bool insideMirror() {
     return dot(cross(UNITY_MATRIX_V[0].xyz, UNITY_MATRIX_V[1].xyz), UNITY_MATRIX_V[2].xyz) > 0;
 }
 
-// Depth (World座標)
-float getDepth(in float2 uv) {
-    float eyeDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv));
+// UVs used by the frame test are eye-local; pack only when sampling depth.
+float getDepth(in float2 eyeUV) {
+    float2 depthUV = UnityStereoTransformScreenSpaceTex(eyeUV);
+    float eyeDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, depthUV));
     return eyeDepth;
 }
 
@@ -31,15 +32,6 @@ bool checkDepth(float2 uv, in float surfaceDistance) {
     return (depth < surfaceDistance) && (depth < _Distance);
 }
 
-float2 adjustStereo(float2 uv) {
-#if UNITY_SINGLE_PASS_STEREO
-    // float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
-    // uv = (uv - scaleOffset.zw) / scaleOffset.xy;
-    // return float2(uv.x * 0.5 + unity_StereoEyeIndex * 0.5, uv.y);
-#endif
-    return uv;
-}
-
 bool isForceVisibleMaskEnabled(in float2 uv) {
     return tex2D(_YubiForceVisibleMask, uv).a != 0;
 }
@@ -50,6 +42,7 @@ void yubiCameraImpl(float2 uv, float4 inScreenPos, float3 inWorldPos) {
     } else {
         if (!isForceVisibleMaskEnabled(uv)) {
             bool left = false, right = false, up = false, down = false;
+            // inScreenPos must come from ComputeNonStereoScreenPos.
             float2 screenPos = inScreenPos.xy / inScreenPos.w;
             float surfaceDistance = surfaceWorldDepth(inWorldPos);
 
@@ -64,7 +57,7 @@ void yubiCameraImpl(float2 uv, float4 inScreenPos, float3 inWorldPos) {
                     t = fmod(m * t + floor(m * t) / iterCount, 1.0);
                     t = t * samplingRange + (1.0 - samplingRange) * 0.5;
 
-                    const bool depthPassX = checkDepth(adjustStereo(float2(t, screenPos.y)), surfaceDistance);
+                    const bool depthPassX = checkDepth(float2(t, screenPos.y), surfaceDistance);
                     const bool depthPassY = checkDepth(float2(screenPos.x, t), surfaceDistance);
 
                     left = left || ((t < screenPos.x) && depthPassX);

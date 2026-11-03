@@ -52,7 +52,7 @@
 
             float4 _Color;
 
-            sampler2D _CameraDepthTexture;
+            UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
             
             #include "YubiCamera.cginc"
 
@@ -66,7 +66,7 @@
 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.screenPos = ComputeScreenPos(o.vertex);
+                o.screenPos = ComputeNonStereoScreenPos(o.vertex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 return o;
             }
