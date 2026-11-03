@@ -32,14 +32,14 @@ struct v2f
 {
     float4 pos          : SV_POSITION;
     float3 positionWS   : TEXCOORD0;
-    float2 uv           : TEXCOORD1;
+    float4 uv           : TEXCOORD1;
     float3 normalWS     : TEXCOORD2;
     // [OpenLit] Add light datas
     #if defined(_PACK_LIGHTDATAS)
         nointerpolation uint3 lightDatas : TEXCOORD3;
         UNITY_FOG_COORDS(4)
         UNITY_LIGHTING_COORDS(5, 6)
-        #if !defined(LIGHTMAP_ON) && UNITY_SHOULD_SAMPLE_SH
+        #if !defined(LIGHTMAP_ON) && UNITY_SHOULD_SAMPLE_SH && defined(VERTEXLIGHT_ON)
             float3 vertexLight  : TEXCOORD7;
         #endif
     #else
@@ -48,7 +48,7 @@ struct v2f
         nointerpolation float3 indirectLight : TEXCOORD5;
         UNITY_FOG_COORDS(6)
         UNITY_LIGHTING_COORDS(7, 8)
-        #if !defined(LIGHTMAP_ON) && UNITY_SHOULD_SAMPLE_SH
+        #if !defined(LIGHTMAP_ON) && UNITY_SHOULD_SAMPLE_SH && defined(VERTEXLIGHT_ON)
             float3 vertexLight  : TEXCOORD9;
         #endif
     #endif
@@ -63,9 +63,10 @@ v2f vert(appdata v)
     UNITY_INITIALIZE_OUTPUT(v2f, o);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-    o.positionWS    = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0));
+    o.positionWS    = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0)).xyz;
     o.pos           = UnityWorldToClipPos(o.positionWS);
-    o.uv            = TRANSFORM_TEX(v.uv, _MainTex);
+    o.uv.xy         = TRANSFORM_TEX(v.uv, _MainTex);
+    o.uv.zw         = TRANSFORM_TEX(v.uv, _YubiForceVisibleMask);
     o.normalWS      = UnityObjectToWorldNormal(v.normalOS);
     o.screenPos     = ComputeNonStereoScreenPos(o.pos);
     UNITY_TRANSFER_FOG(o,o.pos);
@@ -73,7 +74,7 @@ v2f vert(appdata v)
 
     // [OpenLit] Calculate and copy vertex lighting
     #if !defined(LIGHTMAP_ON) && UNITY_SHOULD_SAMPLE_SH && defined(VERTEXLIGHT_ON)
-        o.vertexLight = ComputeAdditionalLights(o.positionWS, o.pos) * _VertexLightStrength;
+        o.vertexLight = ComputeAdditionalLights(o.positionWS, o.pos.xyz) * _VertexLightStrength;
         o.vertexLight = min(o.vertexLight, _LightMaxLimit);
     #endif
 
@@ -97,7 +98,7 @@ float4 frag(v2f i) : SV_Target
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
     if (_EnabledYubiCamera) {
-        yubiCameraImpl(i.uv, i.screenPos, i.positionWS);
+        yubiCameraImpl(i.uv.zw, i.screenPos, i.positionWS);
     }
     
     UNITY_LIGHT_ATTENUATION(attenuation, i, i.positionWS);
@@ -118,11 +119,13 @@ float4 frag(v2f i) : SV_Target
     float factor = NdotL > _ShadowThreshold ? 1 : 0;
     if(_ReceiveShadow) factor *= attenuation;
 
-    float4 col = tex2D(_MainTex, i.uv) * _Color;
+    float4 col = tex2D(_MainTex, i.uv.xy) * _Color;
     float3 albedo = col.rgb;
     col.rgb *= lerp(lightDatas.indirectLight, lightDatas.directLight, factor);
     #if !defined(LIGHTMAP_ON) && UNITY_SHOULD_SAMPLE_SH
-        col.rgb += albedo.rgb * i.vertexLight;
+        #if defined(VERTEXLIGHT_ON)
+            col.rgb += albedo.rgb * i.vertexLight;
+        #endif
         col.rgb = min(col.rgb, albedo.rgb * _LightMaxLimit);
     #endif
     UNITY_APPLY_FOG(i.fogCoord, col);
