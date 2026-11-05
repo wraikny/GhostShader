@@ -26,7 +26,6 @@ Shader "wraiknys/YubiCameraOpenLit/Opaque"
         _VertexLightStrength    ("Vertex Light Strength", Range(0,1)) = 0
         _LightMinLimit          ("Light Min Limit", Range(0,1)) = 0.05
         _LightMaxLimit          ("Light Max Limit", Range(0,10)) = 1
-        _BeforeExposureLimit    ("Before Exposure Limit", Float) = 10000
         _MonochromeLighting     ("Monochrome lighting", Range(0,1)) = 0
         _LightDirectionOverride ("Light Direction Override", Vector) = (0.001,0.002,0.001,0)
 
@@ -43,10 +42,10 @@ Shader "wraiknys/YubiCameraOpenLit/Opaque"
         
         _Distance("Distance", Float) = 0.5
 
-        [Range(0,1)]
-        _SamplingRange("Sampling Range", Float) = 0.8
+        _SamplingRange("Sampling Range", Range(0,1)) = 0.8
 
-        _YubiForceVisibleMask("Force visible mask", 2D) = "black" {}
+        _YubiForceVisibleMask("Force visible mask (Alpha)", 2D) = "black" {}
+        _YubiForceVisibleCutoff("Force visible alpha cutoff", Range(0,1)) = 0
 
         [Enum(OutFrame, 0, InFrame, 1)]
         _VisibleMode("Visible Mode", Int) = 1
@@ -77,20 +76,20 @@ Shader "wraiknys/YubiCameraOpenLit/Opaque"
             float   _VertexLightStrength;
             float   _LightMinLimit;
             float   _LightMaxLimit;
-            float   _BeforeExposureLimit;
             float   _MonochromeLighting;
-            float   _AlphaBoostFA;
             float4  _LightDirectionOverride;
         ENDCG
 
         Pass
         {
+            Tags { "LightMode" = "ForwardBase" }
             BlendOp [_BlendOp], Add
             Blend [_SrcBlend] [_DstBlend], One OneMinusSrcAlpha
 
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma target 3.5
             #pragma multi_compile_fwdbase
             #pragma multi_compile_fog
             #pragma shader_feature_local _ _PACK_LIGHTDATAS
