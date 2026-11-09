@@ -32,9 +32,7 @@ CullingMaskにreservedを指定済みかつIntensityを低くしたものをPref
 
 * Main Texture: テクスチャ
 * Color: 色
-* Distance: 囲いを判定する最大の眼深度（視線方向の距離。カメラからの直線距離ではない）
+* Distance: 囲いを判定する最大距離
 * Sampling Range: サンプリング範囲
-* Force visible mask (Alpha): alpha がしきい値を超えた部分は、枠判定を行わず常に表示する。無効にする部分は alpha を 0 にする。RGB の白黒は判定に使わない。Tiling / Offset は Main Texture から独立している
-* Force visible alpha cutoff: 強制表示する alpha のしきい値。初期値 0 は従来の非ゼロ判定に対応し、境界のにじみを抑えたい場合は値を上げる
 * Visible Mode: 枠の中でのみ見える(InFrame)か、枠の外でのみ見える(OutFrame)か
 * VisibleInMirror: ミラーの中で見えるか
